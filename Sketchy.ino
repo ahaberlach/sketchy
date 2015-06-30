@@ -12,6 +12,8 @@ int Y_STEP_PIN = 10;
 
 char inbuffer[200];
 
+float turtle_angle = 0;
+
 // the setup routine runs once when you press reset:
 void setup() {
   Serial.begin(19200);
@@ -30,9 +32,9 @@ void step_motor(boolean dir, int dir_pin, int step_pin) {
     digitalWrite(dir_pin, LOW);
   }
   digitalWrite(step_pin, HIGH);
-  delay(1);
+  delayMicroseconds(500);
   digitalWrite(step_pin, LOW);
-  delay(1);
+  delayMicroseconds(500);
 }
 
 void step_x(boolean dir) {
@@ -99,6 +101,27 @@ void loop() {
         int count = atoi(strtok(0, " "));
         Serial.println("Going down");
         move_down(count);
+      } else if (0 == strcmp(command, "setheading")) {
+        int normal_degrees = (-atoi(strtok(0, "  ")) + 90);
+        
+        turtle_angle = (normal_degrees / 180.0) * 3.1415;
+      } else if (0 == strcmp(command, "fd")) {
+        int count = atoi(strtok(0, " "));
+        Serial.println("Going forward");
+        for (int i = 0; i < count; i++) {
+          int x_delta = 10 * cos(turtle_angle);
+          if (x_delta > 0) {
+            move_right(x_delta);
+          } else {
+            move_left(-x_delta);
+          }
+          int y_delta = 10 * sin(turtle_angle);
+          if (y_delta > 0) {
+            move_up(y_delta);
+          } else {
+            move_down(-y_delta);
+          }
+        }
       } else {
         Serial.print("Unknown command: \"");
         Serial.print(command);
