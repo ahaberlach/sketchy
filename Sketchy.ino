@@ -69,12 +69,34 @@ void move_down(int count) {
   }
 }
 
+int setheading(int degrees) {
+  turtle_angle = ((90 - degrees) / 180.0) * 3.1415;
+}
+
+void forward(int dist) {
+  for (int i = 0; i < dist; i++) {
+    int x_delta = 10 * cos(turtle_angle);
+    if (x_delta > 0) {
+      move_right(x_delta);
+    } else {
+      move_left(-x_delta);
+    }
+    int y_delta = 10 * sin(turtle_angle);
+    if (y_delta > 0) {
+      move_up(y_delta);
+    } else {
+      move_down(-y_delta);
+    }
+  }
+}
+
 void plot_square(int size) {
   move_up(size);
   move_right(size);
   move_down(size);
   move_left(size);
 }
+
 
 void loop() {
   if (Serial.available()) {
@@ -102,25 +124,15 @@ void loop() {
         Serial.println("Going down");
         move_down(count);
       } else if (0 == strcmp(command, "setheading")) {
-        int normal_degrees = (-atoi(strtok(0, "  ")) + 90);
-        
-        turtle_angle = (normal_degrees / 180.0) * 3.1415;
+        setheading(atoi(strtok(0, " ")));
       } else if (0 == strcmp(command, "fd")) {
         int count = atoi(strtok(0, " "));
         Serial.println("Going forward");
-        for (int i = 0; i < count; i++) {
-          int x_delta = 10 * cos(turtle_angle);
-          if (x_delta > 0) {
-            move_right(x_delta);
-          } else {
-            move_left(-x_delta);
-          }
-          int y_delta = 10 * sin(turtle_angle);
-          if (y_delta > 0) {
-            move_up(y_delta);
-          } else {
-            move_down(-y_delta);
-          }
+        forward(count);
+      } else if (0 == strcmp(command, "circle")) {
+        for (int i = 0; i < 360; i++) {
+          setheading(i);
+          forward(2);
         }
       } else {
         Serial.print("Unknown command: \"");
